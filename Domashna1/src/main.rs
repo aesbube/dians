@@ -169,7 +169,6 @@ async fn update_seller_data(
     client: &Client,
     data_all: &mut HashMap<String, Value>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // Check if seller exists and get data
     let seller_data = match data_all.get(seller) {
         Some(data) => data,
         None => {
