@@ -119,14 +119,14 @@ async fn scrape_page(
             let date = NaiveDate::parse_from_str(&cells[0], "%d.%m.%Y")?;
             data.push(StockData {
                 date: date.format("%d.%m.%Y").to_string(),
-                last_transaction: cells[1].clone(),
-                max_value: cells[2].clone(),
-                min_value: cells[3].clone(),
-                average: cells[4].clone(),
+                last_transaction: format!("{} ден.", cells[1].clone()),
+                max_value: format!("{} ден.", cells[2].clone()),
+                min_value: format!("{} ден.", cells[3].clone()),
+                average: format!("{} ден.", cells[4].clone()),
                 change: cells[5].clone(),
                 volume: cells[6].clone(),
-                best_sales: cells[7].clone(),
-                all_sales: cells[8].clone(),
+                best_sales: format!("{} ден.", cells[7].clone()),
+                all_sales: format!("{} ден.", cells[8].clone()),
             });
         }
     }
