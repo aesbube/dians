@@ -21,9 +21,7 @@ git clone https://github.com/aesbube/dians.git
 cd dians/Domashna1
 ```
 ## Build and run
-    ```sh
-        cargo build
-    ```
-    ```sh
-        cargo run
-    ```
+```bash
+    cargo build
+    cargo run
+```
