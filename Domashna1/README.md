@@ -22,6 +22,6 @@ cd dians/Domashna1
 ```
 ## Build and run
 ```bash
-    cargo build
-    cargo run
+cargo build
+cargo run
 ```
