@@ -5,9 +5,11 @@ use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
-use std::fs::File;
+use std::fs::{File, create_dir_all};
 use std::io::{Read, Write};
 use std::time::Instant;
+use std::env;
+use std::path::Path;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct StockData {
@@ -253,14 +255,19 @@ async fn update_seller_data(
 }
 
 fn load_data() -> Result<HashMap<String, Value>, Box<dyn std::error::Error>> {
-    let mut file = File::open("scraped_data.json")?;
+    let path = env::var("DATA_PATH").unwrap_or_else(|_| "scraped_data.json".to_string());
+    let mut file = File::open(&path)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
     Ok(serde_json::from_str(&contents)?)
 }
 
 fn save_data(data: &HashMap<String, Value>) -> Result<(), Box<dyn std::error::Error>> {
-    let mut file = File::create("scraped_data.json")?;
+    let path = env::var("DATA_PATH").unwrap_or_else(|_| "scraped_data.json".to_string());
+    if let Some(parent) = Path::new(&path).parent() {
+        create_dir_all(parent)?;
+    }
+    let mut file = File::create(&path)?;
     file.write_all(serde_json::to_string_pretty(data)?.as_bytes())?;
     Ok(())
 }

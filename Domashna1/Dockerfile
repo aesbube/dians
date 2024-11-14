@@ -11,4 +11,6 @@ COPY --from=builder /app/target/release/Scraper /usr/local/bin/Scraper
 
 RUN update-ca-certificates
 
+ENV DATA_PATH="/app/scraped_data.json"
+
 CMD ["Scraper"]
