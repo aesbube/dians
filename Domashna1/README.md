@@ -22,7 +22,6 @@ This project requires Rust, Cargo, and basic knowledge of web scraping in Rust u
     docker-compose up -d
     ```
 
-
 ## Installation
 Clone this repository and navigate to the project directory:
 ```bash
