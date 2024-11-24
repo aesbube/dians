@@ -1,15 +1,14 @@
 use chrono::{Local, NaiveDate};
-use futures::future::join_all;
+use mongodb::{
+    bson::{doc, to_bson, Document},
+    options::ClientOptions,
+    Client as MongoClient,
+};
 use reqwest::Client;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
-use std::collections::HashMap;
-use std::fs::{File, create_dir_all};
-use std::io::{Read, Write};
-use std::time::Instant;
 use std::env;
-use std::path::Path;
+use std::time::Instant;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct StockData {
@@ -28,39 +27,26 @@ struct StockData {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
     let client = Client::new();
-    let mut data_all: HashMap<String, Value> = load_data().unwrap_or_default();
+    
+    // MongoDB setup
+    let mongo_uri = env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".to_string());
+    let mongo_client = connect_to_mongodb(&mongo_uri).await?;
+    let db = mongo_client.database("stock_data");
+    let collection = db.collection::<Document>("stock_records");
+
     let sellers = get_sellers(&client).await?;
 
-    if data_all.is_empty() {
-        let futures: Vec<_> = sellers
-            .iter()
-            .map(|seller| scrape_seller_data(seller.clone(), &client, &data_all))
-            .collect();
-
-        let results = join_all(futures).await;
-
-        for result in results {
-            if let Ok((seller, data)) = result {
-                data_all.insert(seller, json!(data));
+    for seller in &sellers {
+        if let Ok(Some(_)) = collection.find_one(doc! { "_id": seller }, None).await {
+            if let Err(e) = update_seller_data(seller, &client, &collection).await {
+                eprintln!("Error updating {}: {}", seller, e);
             }
-        }
-    } else {
-        for seller in &sellers {
-            if data_all.contains_key(seller) {
-                if let Err(e) = update_seller_data(seller, &client, &mut data_all).await {
-                    eprintln!("Error updating {}: {}", seller, e);
-                }
-            } else {
-                if let Ok((seller_name, data)) =
-                    scrape_seller_data(seller.clone(), &client, &data_all).await
-                {
-                    data_all.insert(seller_name, json!(data));
-                }
+        } else {
+            if let Ok((_, data)) = scrape_seller_data(seller.clone(), &client).await {
+                save_to_mongodb(&collection, seller, &data).await?;
             }
         }
     }
-
-    save_data(&data_all)?;
 
     println!(
         "It took {:.3} seconds to scrape the data",
@@ -70,27 +56,128 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn get_sellers(client: &Client) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-    let url = "https://www.mse.mk/mk/stats/symbolhistory/ADIN";
-    let response = client.get(url).send().await?.text().await?;
-    let document = Html::parse_document(&response);
-    let selector = Selector::parse("option").unwrap();
-
-    let sellers: Vec<String> = document
-        .select(&selector)
-        .filter_map(|element| {
-            let text = element.text().collect::<String>();
-            if !text.chars().any(|c| c.is_numeric()) {
-                Some(text)
-            } else {
-                None
-            }
-        })
-        .collect();
-
-    Ok(sellers)
+async fn connect_to_mongodb(uri: &str) -> Result<MongoClient, mongodb::error::Error> {
+    let client_options = ClientOptions::parse(uri).await?;
+    MongoClient::with_options(client_options)
 }
 
+async fn save_to_mongodb(
+    collection: &mongodb::Collection<Document>,
+    seller: &str,
+    data: &[StockData],
+) -> Result<(), Box<dyn std::error::Error>> {
+    let data_bson = to_bson(data)?;
+    
+    let update = doc! {
+        "$set": {
+            "_id": seller,
+            "data": data_bson
+        }
+    };
+
+    collection
+        .update_one(
+            doc! { "_id": seller },
+            update,
+            mongodb::options::UpdateOptions::builder().upsert(true).build(),
+        )
+        .await?;
+
+    Ok(())
+}
+
+async fn get_last_date(
+    collection: &mongodb::Collection<Document>,
+    seller: &str,
+) -> Result<Option<NaiveDate>, Box<dyn std::error::Error>> {
+    if let Some(doc) = collection.find_one(doc! { "_id": seller }, None).await? {
+        if let Some(data) = doc.get_array("data").ok() {
+            if let Some(first_item) = data.first() {
+                if let Some(date_str) = first_item.as_document().and_then(|d| d.get_str("date").ok()) {
+                    return Ok(Some(NaiveDate::parse_from_str(date_str, "%d.%m.%Y")?));
+                }
+            }
+        }
+    }
+    Ok(None)
+}
+
+async fn update_seller_data(
+    seller: &str,
+    client: &Client,
+    collection: &mongodb::Collection<Document>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let last_date = match get_last_date(collection, seller).await? {
+        Some(date) => date,
+        None => {
+            let (_, new_data) = scrape_seller_data(seller.to_string(), client).await?;
+            save_to_mongodb(collection, seller, &new_data).await?;
+            return Ok(());
+        }
+    };
+
+    // let mut to_date = last_date - chrono::Duration::days(1);
+    let mut to_date = last_date;
+    let today: NaiveDate = Local::now().naive_local().date();
+    let mut new_data = Vec::new();
+    println!("Now updating seller {}", seller);
+
+    while to_date <= today {
+        let from = std::cmp::min(to_date + chrono::Duration::days(1), today);
+        to_date = from + chrono::Duration::days(365);
+
+        match scrape_page(seller, from, to_date, client).await {
+            Ok(mut page_data) => new_data.append(&mut page_data),
+            Err(_) => continue,
+        }
+    }
+
+    if !new_data.is_empty() {
+        // Get existing data
+        let existing_doc = collection.find_one(doc! { "_id": seller }, None).await?;
+        if let Some(doc) = existing_doc {
+            if let Ok(mut existing_data) = doc.get_array("data").map(|arr| {
+                arr.iter()
+                    .filter_map(|item| {
+                        if let Ok(stock_data) = mongodb::bson::from_bson::<StockData>(item.clone()) {
+                            Some(stock_data)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<StockData>>()
+            }) {
+                new_data.append(&mut existing_data);
+            }
+        }
+        
+        save_to_mongodb(collection, seller, &new_data).await?;
+    }
+
+    Ok(())
+}
+
+async fn scrape_seller_data(
+    seller: String,
+    client: &Client,
+) -> Result<(String, Vec<StockData>), Box<dyn std::error::Error>> {
+    println!("Now scraping for seller {}", seller);
+    let mut data = Vec::new();
+    let mut to_date = Local::now().naive_local().date() + chrono::Duration::days(366);
+
+    for _ in 0..10 {
+        to_date -= chrono::Duration::days(366);
+        let from_date = to_date - chrono::Duration::days(365);
+        match scrape_page(&seller, from_date, to_date, client).await {
+            Ok(mut page_data) => data.append(&mut page_data),
+            Err(_) => continue,
+        }
+    }
+
+    Ok((seller, data))
+}
+
+// Keep the existing scrape_page and get_sellers functions unchanged
 async fn scrape_page(
     seller: &str,
     from_date: NaiveDate,
@@ -136,138 +223,23 @@ async fn scrape_page(
     Ok(data)
 }
 
-async fn scrape_seller_data(
-    seller: String,
-    client: &Client,
-    data_all: &HashMap<String, Value>,
-) -> Result<(String, Vec<StockData>), Box<dyn std::error::Error>> {
-    if !data_all.contains_key(&seller)
-        || (data_all
-            .get(&seller)
-            .and_then(|v| v.as_array())
-            .map_or(true, |arr| arr.is_empty()))
-    {
-        println!("Now scraping for seller {}", seller);
-        let mut data = Vec::new();
-        let mut to_date = Local::now().naive_local().date() + chrono::Duration::days(366);
+async fn get_sellers(client: &Client) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let url = "https://www.mse.mk/mk/stats/symbolhistory/ADIN";
+    let response = client.get(url).send().await?.text().await?;
+    let document = Html::parse_document(&response);
+    let selector = Selector::parse("option").unwrap();
 
-        for _ in 0..10 {
-            to_date -= chrono::Duration::days(366);
-            let from_date = to_date - chrono::Duration::days(365);
-            match scrape_page(&seller, from_date, to_date, client).await {
-                Ok(mut page_data) => data.append(&mut page_data),
-                Err(_) => continue,
-            }
-        }
-
-        Ok((seller, data))
-    } else {
-        Ok((seller, Vec::new()))
-    }
-}
-
-async fn update_seller_data(
-    seller: &str,
-    client: &Client,
-    data_all: &mut HashMap<String, Value>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let seller_data = match data_all.get(seller) {
-        Some(data) => data,
-        None => {
-            println!("No data found for seller {}, scraping new data", seller);
-            let (_, new_data) = scrape_seller_data(seller.to_string(), client, data_all).await?;
-            if !new_data.is_empty() {
-                data_all.insert(seller.to_string(), json!(new_data));
-            }
-            return Ok(());
-        }
-    };
-
-    let from_date = match seller_data {
-        Value::Array(arr) => {
-            if arr.is_empty() {
-                println!("Empty data found for seller {}, scraping new data", seller);
-                let (_, new_data) =
-                    scrape_seller_data(seller.to_string(), client, data_all).await?;
-                if !new_data.is_empty() {
-                    data_all.insert(seller.to_string(), json!(new_data));
-                }
-                return Ok(());
-            }
-
-            if let Some(first_entry) = arr.first() {
-                let date_str = first_entry
-                    .get("date")
-                    .and_then(|d| d.as_str())
-                    .ok_or("Invalid date format")?;
-                NaiveDate::parse_from_str(date_str, "%d.%m.%Y")? + chrono::Duration::days(1)
+    let sellers: Vec<String> = document
+        .select(&selector)
+        .filter_map(|element| {
+            let text = element.text().collect::<String>();
+            if !text.chars().any(|c| c.is_numeric()) {
+                Some(text)
             } else {
-                return Ok(());
+                None
             }
-        }
-        Value::String(date_str) => NaiveDate::parse_from_str(date_str, "%Y-%m-%d")?,
-        _ => {
-            println!(
-                "Invalid data format for seller {}, scraping new data",
-                seller
-            );
-            let (_, new_data) = scrape_seller_data(seller.to_string(), client, data_all).await?;
-            if !new_data.is_empty() {
-                data_all.insert(seller.to_string(), json!(new_data));
-            }
-            return Ok(());
-        }
-    };
+        })
+        .collect();
 
-    let mut to_date = from_date - chrono::Duration::days(1);
-    let today = Local::now().naive_local().date();
-    let mut new_data = Vec::new();
-    println!("Now updating seller {}", seller);
-
-    while to_date <= today {
-        let from = std::cmp::min(to_date + chrono::Duration::days(1), today);
-        to_date = from + chrono::Duration::days(365);
-
-        match scrape_page(seller, from, to_date, client).await {
-            Ok(mut page_data) => new_data.append(&mut page_data),
-            Err(_) => continue,
-        }
-    }
-
-    if !new_data.is_empty() {
-        match seller_data {
-            Value::Array(existing_data) => {
-                let mut combined_data = new_data;
-                combined_data.extend(
-                    existing_data
-                        .iter()
-                        .filter_map(|v| serde_json::from_value::<StockData>(v.clone()).ok()),
-                );
-                data_all.insert(seller.to_string(), json!(combined_data));
-            }
-            _ => {
-                data_all.insert(seller.to_string(), json!(new_data));
-            }
-        }
-    }
-
-    Ok(())
-}
-
-fn load_data() -> Result<HashMap<String, Value>, Box<dyn std::error::Error>> {
-    let path = env::var("DATA_PATH").unwrap_or_else(|_| "scraped_data.json".to_string());
-    let mut file = File::open(&path)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(serde_json::from_str(&contents)?)
-}
-
-fn save_data(data: &HashMap<String, Value>) -> Result<(), Box<dyn std::error::Error>> {
-    let path = env::var("DATA_PATH").unwrap_or_else(|_| "scraped_data.json".to_string());
-    if let Some(parent) = Path::new(&path).parent() {
-        create_dir_all(parent)?;
-    }
-    let mut file = File::create(&path)?;
-    file.write_all(serde_json::to_string_pretty(data)?.as_bytes())?;
-    Ok(())
+    Ok(sellers)
 }
