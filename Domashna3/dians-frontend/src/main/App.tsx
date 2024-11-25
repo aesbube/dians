@@ -1,30 +1,40 @@
 import { Suspense, lazy } from "react";
-// import Background from "../components/background";
 import Spinner from "../components/spinner";
 import ColumnContainer from "../components/column_container";
-import Column from "../components/column";
+import NavBar from "../content/navbar";
+import { Route, Routes, BrowserRouter as Router } from "react-router-dom";
+import BackgroundContainer from "../components/background.";
+import HomePage from "../pages/home";
 
+// Lazy load the components
 const LazyColumnContainer = lazy(
   () => import("../components/column_container")
 );
+// const Graph = lazy(() => import("../components/graph"));
+// const TechnicalAnalysis = lazy(() => import("../components/technical_analysis"));
+// const FundamentalAnalysis = lazy(() => import("../components/fundamental_analysis"));
+// const LstmPredict = lazy(() => import("../components/lstm_predict"));
 
 const App: React.FC = () => {
   return (
-    <>
+    <Router>
+      <BackgroundContainer />
       <Suspense fallback={<Spinner />}>
         <LazyColumnContainer>
-          {/* <Background /> */}
+          <NavBar />
           <ColumnContainer>
-            <Column>
-              <h1>DIANS</h1>
-            </Column>
-            <Column>
-              <p>DIANS is a social network for developers.</p>
-            </Column>
+            {/* Add Routes inside the ColumnContainer */}
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              {/* <Route path="/graph" element={<Graph />} />
+              <Route path="/technical" element={<TechnicalAnalysis />} />
+              <Route path="/fundamental" element={<FundamentalAnalysis />} />
+              <Route path="/lstm" element={<LstmPredict />} /> */}
+            </Routes>
           </ColumnContainer>
         </LazyColumnContainer>
       </Suspense>
-    </>
+    </Router>
   );
 };
 
