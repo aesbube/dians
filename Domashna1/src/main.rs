@@ -28,7 +28,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
     let client = Client::new();
     
-    // MongoDB setup
     let mongo_uri = env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".to_string());
     let mongo_client = connect_to_mongodb(&mongo_uri).await?;
     let db = mongo_client.database("stock_data");
@@ -116,7 +115,6 @@ async fn update_seller_data(
         }
     };
 
-    // let mut to_date = last_date - chrono::Duration::days(1);
     let mut to_date = last_date;
     let today: NaiveDate = Local::now().naive_local().date();
     let mut new_data = Vec::new();
@@ -133,7 +131,6 @@ async fn update_seller_data(
     }
 
     if !new_data.is_empty() {
-        // Get existing data
         let existing_doc = collection.find_one(doc! { "_id": seller }, None).await?;
         if let Some(doc) = existing_doc {
             if let Ok(mut existing_data) = doc.get_array("data").map(|arr| {
@@ -177,7 +174,6 @@ async fn scrape_seller_data(
     Ok((seller, data))
 }
 
-// Keep the existing scrape_page and get_sellers functions unchanged
 async fn scrape_page(
     seller: &str,
     from_date: NaiveDate,
