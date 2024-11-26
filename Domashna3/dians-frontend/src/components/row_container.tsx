@@ -7,6 +7,7 @@ const RowContainer = styled(Container)({
   width: "100%",
   padding: "15px",
   flexDirection: "row",
+  paddingTop: "2rem",
 });
 
 export default RowContainer;

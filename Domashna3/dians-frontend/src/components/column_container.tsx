@@ -7,7 +7,7 @@ const fadeInAnimation = css`
 
 const ColumnContainer = styled(Container)({
   display: "flex",
-  alignItems: "center",
+  alignItems: "strech",
   justifyContent: "center",
   width: "100%",
   height: "100vh",
