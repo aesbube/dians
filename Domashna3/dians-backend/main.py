@@ -43,4 +43,4 @@ def get_stock_data(stock_id: str):
     stock = collection.find_one({"_id": stock_id.upper()})
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
-    return {"stock_id": stock_id, "data": stock["data"]}
+    return stock["data"]
