@@ -9,7 +9,7 @@ const BackgroundContainer = styled(Paper)({
     width: "100%",
     height: "100%",
     overflow: "hidden",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "#191a1c",
   });
 
 export default BackgroundContainer;

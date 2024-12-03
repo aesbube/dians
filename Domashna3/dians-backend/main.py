@@ -44,3 +44,18 @@ def get_stock_data(stock_id: str):
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
     return stock["data"]
+
+@app.get("/stocks/{stock_id}/chart")
+def get_date_price(stock_id: str):
+    """
+    Fetches the date and price for a specific stock ID.
+    """
+    stock = collection.find_one({"_id": stock_id.upper()})
+    if not stock:
+        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
+    dates = []
+    prices = []
+    for data in stock["data"]:
+        dates.append(data["date"])
+        prices.append(int(data["last_transaction"][:-8].replace('.', '')))
+    return (dates[::-1], prices[::-1])

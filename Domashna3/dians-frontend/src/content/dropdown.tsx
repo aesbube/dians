@@ -17,7 +17,11 @@ const MenuProps = {
   },
 };
 
-function getStyles(name: string, selectedOption: string | undefined, theme: Theme) {
+function getStyles(
+  name: string,
+  selectedOption: string | undefined,
+  theme: Theme
+) {
   return {
     fontWeight:
       selectedOption === name
@@ -45,7 +49,20 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <div>
-      <FormControl sx={{ m: 1, width: 300 }}>
+      <FormControl
+        sx={{
+          m: 1,
+          width: 300,
+          "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+              borderColor: "lightgray", // Default outline color
+            },
+          },
+          "& .MuiInputLabel-root": {
+            color: "lightgray", // Default label text color
+          },
+        }}
+      >
         <InputLabel id="dropdown-label">Name</InputLabel>
         <Select
           labelId="dropdown-label"
@@ -54,9 +71,15 @@ const Dropdown: React.FC<DropdownProps> = ({
           onChange={handleChange}
           input={<OutlinedInput label="Name" />}
           MenuProps={MenuProps}
+          sx={{ color: "lightgray" }}
         >
           {options.map((name) => (
-            <MenuItem key={name} value={name} style={getStyles(name, selectedStock, theme)}>
+            <MenuItem
+              key={name}
+              value={name}
+              style={getStyles(name, selectedStock, theme)
+              }
+            >
               {name}
             </MenuItem>
           ))}

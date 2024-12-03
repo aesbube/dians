@@ -61,10 +61,21 @@ const DataTable: React.FC<DataTableProps> = ({ selectedStock }) => {
 
   return (
     <DataGrid
-      sx={{ maxHeight: "80%", width: "100%" }}
+      sx={{
+        maxHeight: "80%",
+        width: "100%",
+        bgcolor: "lightgray", // Background color of the DataGrid
+        "& .MuiDataGrid-root": {
+          backgroundColor: "lightgray", // Inner grid background
+        },
+      }}
       columns={[
         { field: "date", headerName: "Date", flex: 1 },
-        { field: "last_transaction", headerName: "Last Transaction", flex: 1.2 },
+        {
+          field: "last_transaction",
+          headerName: "Last Transaction",
+          flex: 1.2,
+        },
         { field: "max_value", headerName: "Max Value", flex: 1.2 },
         { field: "min_value", headerName: "Min Value", flex: 1.2 },
         { field: "average", headerName: "Average", flex: 1.2 },
