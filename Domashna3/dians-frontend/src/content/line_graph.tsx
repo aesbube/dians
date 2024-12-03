@@ -21,7 +21,6 @@ const LineChartComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
         );
         const data = await response.json();
 
-        // const xRange = Array.from({ length: data[0].length }, (_, i) => i);
         setXData(data[0]);
         setYData(data[1]);
         console.log(xData[0], yData[0]);

@@ -64,9 +64,9 @@ const DataTable: React.FC<DataTableProps> = ({ selectedStock }) => {
       sx={{
         maxHeight: "80%",
         width: "100%",
-        bgcolor: "lightgray", // Background color of the DataGrid
+        bgcolor: "lightgray",
         "& .MuiDataGrid-root": {
-          backgroundColor: "lightgray", // Inner grid background
+          backgroundColor: "lightgray",
         },
       }}
       columns={[

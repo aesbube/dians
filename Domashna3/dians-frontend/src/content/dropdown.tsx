@@ -55,11 +55,11 @@ const Dropdown: React.FC<DropdownProps> = ({
           width: 300,
           "& .MuiOutlinedInput-root": {
             "& fieldset": {
-              borderColor: "lightgray", // Default outline color
+              borderColor: "lightgray", 
             },
           },
           "& .MuiInputLabel-root": {
-            color: "lightgray", // Default label text color
+            color: "lightgray", 
           },
         }}
       >
