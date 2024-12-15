@@ -70,5 +70,4 @@ def get_technical_analysis(stock_id: str, choice=30): #choice: 1=daily, 7=weekly
 
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
-    # return "peder"
-    return [tech_results(stock["data"][:30], choice)]
+    return tech_results(stock["data"][:30], choice)
