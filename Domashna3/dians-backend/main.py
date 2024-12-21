@@ -8,16 +8,16 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], 
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"],  
-    allow_headers=["*"],  
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-MONGO_URI = "mongodb://localhost:27017"  
+MONGO_URI = "mongodb://localhost:27017"
 client = MongoClient(MONGO_URI)
-db = client["stock_data"]  
-collection = db["stock_records"] 
+db = client["stock_data"]
+collection = db["stock_records"]
 
 
 @app.get("/")
@@ -43,8 +43,10 @@ def get_stock_data(stock_id: str):
     """
     stock = collection.find_one({"_id": stock_id.upper()})
     if not stock:
-        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
+        raise HTTPException(status_code=404, detail=f"Stock ID {
+                            stock_id} not found")
     return stock["data"]
+
 
 @app.get("/stocks/{stock_id}/chart")
 def get_date_price(stock_id: str):
@@ -53,7 +55,8 @@ def get_date_price(stock_id: str):
     """
     stock = collection.find_one({"_id": stock_id.upper()})
     if not stock:
-        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
+        raise HTTPException(status_code=404, detail=f"Stock ID {
+                            stock_id} not found")
     dates = []
     prices = []
     for data in stock["data"]:
@@ -61,13 +64,28 @@ def get_date_price(stock_id: str):
         prices.append(int(data["last_transaction"][:-8].replace('.', '')))
     return (dates[::-1], prices[::-1])
 
+
 @app.get("/technical_analysis/{stock_id}")
-def get_technical_analysis(stock_id: str, choice=30): #choice: 1=daily, 7=weekly, 30=monthly
+def get_technical_analysis(stock_id: str, choice=30):
     """
     Fetches the technical analysis for a specific stock ID.
     """
     stock = collection.find_one({"_id": stock_id.upper()})
 
+    periods = {
+        "day": 2,
+        "week": 7,
+        "month": 30
+    }
+
+    results = dict()
+
+    for period, num in periods.items():
+        days = min(num, len(stock["data"]))
+        result = tech_results(stock["data"][:days], days)
+        results[period] = result
+
     if not stock:
-        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
-    return tech_results(stock["data"][:30], choice)
+        raise HTTPException(status_code=404, detail=f"Stock ID {
+                            stock_id} not found")
+    return results

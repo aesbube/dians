@@ -18,10 +18,13 @@ def calculate_relative_strength_index(data, window):
     differences = np.diff(data)
     gain = np.where(differences > 0, differences, 0)
     loss = np.where(differences < 0, -differences, 0)
-    
-    avg_gain = np.convolve(gain, np.ones(window), 'valid') / window
-    avg_loss = np.convolve(loss, np.ones(window), 'valid') / window
-    
+    if window > 1:
+        avg_gain = np.convolve(gain, np.ones(window), 'valid') / window
+        avg_loss = np.convolve(loss, np.ones(window), 'valid') / window
+    else:
+        return 0
+    if avg_loss[0] == 0:
+        return 0
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
     
@@ -31,13 +34,18 @@ def calculate_momentum(data, window):
     return round((data[0]-data[window-1])/data[window-1]*100,3)
 
 def calculate_williams_percent_range(data, window):
+    window = 1
     highest_high = max(data[:window])
     lowest_low = min(data[:window])
+    if highest_high == lowest_low:
+        return 0
     return round(-100 * (highest_high - data[0]) / (highest_high - lowest_low),3)
 
 def calculate_stochastic_oscillator(data, window):
     highest_high = max(data[:window])
     lowest_low = min(data[:window])
+    if highest_high == lowest_low:
+        return 0
     return round(100 * (data[0] - lowest_low) / (highest_high - lowest_low),3)
 
 def calculate_ultimate_oscillator(data):
