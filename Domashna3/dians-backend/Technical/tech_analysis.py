@@ -9,6 +9,7 @@ def parse_data(data):
     data_copy = []
     for entry in data:
         parsed = dict()
+        parsed['date'] = entry['date']
         for part in ['last_transaction', 'max_value', 'min_value']:
             parsed[part] = parse_singular(entry[part])
         parsed["volume"] = int(entry["volume"][:].replace('.', ''))

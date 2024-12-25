@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from typing import List
 from Technical.tech_analysis import tech_results
+from LSTM.lstm_predictor import predictor
+
 
 app = FastAPI()
 
@@ -47,6 +49,14 @@ def get_stock_data(stock_id: str):
                             stock_id} not found")
     return stock["data"]
 
+@app.get("/lstm_predict/{stock_id}")
+def get_prediction(stock_id: str):
+    stock = collection.find_one({"_id": stock_id.upper()})
+    if not stock:
+        raise HTTPException(status_code=404, detail=f"Stock ID {
+                            stock_id} not found")
+    return predictor(stock["data"])
+
 
 @app.get("/stocks/{stock_id}/chart")
 def get_date_price(stock_id: str):
@@ -57,8 +67,7 @@ def get_date_price(stock_id: str):
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {
                             stock_id} not found")
-    dates = []
-    prices = []
+    dates, prices = [], []
     for data in stock["data"]:
         dates.append(data["date"])
         prices.append(int(data["last_transaction"][:-8].replace('.', '')))
