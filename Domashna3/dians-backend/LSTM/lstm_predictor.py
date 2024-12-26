@@ -12,6 +12,9 @@ def predictor(data):
     data = parse_data(data)
     data = pd.DataFrame(data=data)
 
+    if len(data) == 0:
+            return "No data available for this stock"
+    
     data.drop(columns=['min_value', 'max_value', 'volume'], inplace=True)
 
     data['date'] = pd.to_datetime(data['date'], dayfirst=True)
