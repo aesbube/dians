@@ -49,6 +49,7 @@ def get_stock_data(stock_id: str):
                             stock_id} not found")
     return stock["data"]
 
+
 @app.get("/lstm_predict/{stock_id}")
 def get_prediction(stock_id: str):
     stock = collection.find_one({"_id": stock_id.upper()})
