@@ -52,10 +52,16 @@ def get_stock_data(stock_id: str):
 
 @app.get("/lstm_predict/{stock_id}")
 def get_prediction(stock_id: str):
+    """
+    Fetches the LSTM prediction for a specific stock ID.    
+    """
     stock = collection.find_one({"_id": stock_id.upper()})
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {
                             stock_id} not found")
+    if len(stock["data"]) == 0:
+        raise HTTPException(
+            status_code=404, detail="No data available for this stock")
     return predictor(stock["data"])
 
 
@@ -81,6 +87,10 @@ def get_technical_analysis(stock_id: str, choice=30):
     Fetches the technical analysis for a specific stock ID.
     """
     stock = collection.find_one({"_id": stock_id.upper()})
+
+    if len(stock["data"]) == 0:
+        raise HTTPException(
+            status_code=404, detail="No data available for this stock")
 
     periods = {
         "day": 2,
