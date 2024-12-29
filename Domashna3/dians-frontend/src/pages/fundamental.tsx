@@ -4,7 +4,7 @@ import Item from "../components/item";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Typography } from "@mui/material";
 import Column from "../components/column";
-
+import Fundamental from "../content/fundamental";
 
 const LazyColumnContainer = lazy(
   () => import("../components/column_container")
@@ -34,23 +34,23 @@ const FundamentalAnalysis = () => {
 
   return (
     <Suspense fallback={<CircularProgress />}>
-    <LazyColumnContainer>
-      <Column>
-        <Item>
-          <Dropdown
-            options={options}
-            selectedStock={selectedStock}
-            onSelectionChange={(stock) => setSelectedStock(stock)}
-          />
-        </Item>
-      </Column>
-      <Column>
-        <Item>
-        <Typography variant="h6" sx={{zIndex:1, color:"white"}}>Според анализата на последниот финансиски извештај цената на акцијата ќе падне во следните 10 дена :0</Typography>
-        </Item>
-      </Column>
-    </LazyColumnContainer>
-  </Suspense>
+      <LazyColumnContainer>
+        <Column>
+          <Item>
+            <Dropdown
+              options={options}
+              selectedStock={selectedStock}
+              onSelectionChange={(stock) => setSelectedStock(stock)}
+            />
+          </Item>
+        </Column>
+        <Column>
+          <Item>
+            <Fundamental stock={selectedStock} />
+          </Item>
+        </Column>
+      </LazyColumnContainer>
+    </Suspense>
   );
 };
 
