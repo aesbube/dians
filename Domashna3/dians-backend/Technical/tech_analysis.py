@@ -21,17 +21,19 @@ def calculate_relative_strength_index(data, window):
     differences = np.diff(data)
     gain = np.where(differences > 0, differences, 0)
     loss = np.where(differences < 0, -differences, 0)
+
     if window > 1:
         avg_gain = np.convolve(gain, np.ones(window), 'valid') / window
         avg_loss = np.convolve(loss, np.ones(window), 'valid') / window
     else:
-        result = 0
+        avg_gain = np.array([0])
+        avg_loss = np.array([1])
+
     if avg_loss[0] == 0:
         result = 0
     else:
         rs = avg_gain / avg_loss
         rsi = 100 - (100 / (1 + rs))
-
         result = round(rsi[0], 3)
 
     if result == 0:
@@ -258,7 +260,7 @@ def ichimoku_base_line(data, period):
 def compare_moving_averages(price: float, sma: float, ema: float, hma: float, vwma: float) -> str:
     if price == 0 or sma == 0:
         return "neutral"
-    
+
     signals = [
         price > sma,
         price > ema,

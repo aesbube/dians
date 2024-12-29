@@ -88,7 +88,11 @@ def get_technical_analysis(stock_id: str, choice=30):
     """
     stock = collection.find_one({"_id": stock_id.upper()})
 
-    if len(stock["data"]) == 0:
+    if not stock:
+        raise HTTPException(status_code=404, detail=f"Stock ID {
+                            stock_id} not found")
+
+    if len(stock["data"]) < 2:
         raise HTTPException(
             status_code=404, detail="No data available for this stock")
 
@@ -105,7 +109,4 @@ def get_technical_analysis(stock_id: str, choice=30):
         result = tech_results(stock["data"][:days], days)
         results[period] = result
 
-    if not stock:
-        raise HTTPException(status_code=404, detail=f"Stock ID {
-                            stock_id} not found")
     return results

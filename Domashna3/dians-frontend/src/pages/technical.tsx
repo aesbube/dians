@@ -4,14 +4,19 @@ import Item from "../components/item";
 import Column from "../components/column";
 import CircularProgress from "@mui/material/CircularProgress";
 import TechnicalParameters from "../content/technical";
+import Row from "../components/row";
 
 const LazyColumnContainer = lazy(
   () => import("../components/column_container")
 );
 
-const HomePage = () => {
+const LazyRowContainer = lazy(() => import("../components/row_container"));
+
+const TechnicalAnalysis = () => {
   const [selectedStock, setSelectedStock] = useState<string>("");
   const [options, setOptions] = useState<string[]>([]);
+  const [period, setPeriod] = useState<string[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -20,6 +25,10 @@ const HomePage = () => {
         const data = await response.json();
         setOptions(data);
 
+        const periods = ["Day", "Week", "Month"];
+        setPeriod(periods);
+
+        setSelectedPeriod(periods[0]);
         if (data.length > 0) {
           setSelectedStock(data[0]);
         }
@@ -27,7 +36,6 @@ const HomePage = () => {
         console.error("Error fetching dropdown options:", error);
       }
     };
-
     fetchOptions();
   }, []);
 
@@ -35,17 +43,30 @@ const HomePage = () => {
     <Suspense fallback={<CircularProgress />}>
       <LazyColumnContainer>
         <Column>
-          <Item>
-            <Dropdown
-              options={options}
-              selectedStock={selectedStock}
-              onSelectionChange={(stock) => setSelectedStock(stock)}
-            />
-          </Item>
+          <LazyRowContainer>
+            <Row>
+              <Item>
+                <Dropdown
+                  options={options}
+                  selectedStock={selectedStock}
+                  onSelectionChange={(stock) => setSelectedStock(stock)}
+                />
+              </Item>
+            </Row>
+            <Row>
+              <Item>
+                <Dropdown
+                  options={period}
+                  selectedStock={selectedPeriod}
+                  onSelectionChange={(period) => setSelectedPeriod(period)}
+                />
+              </Item>
+            </Row>
+          </LazyRowContainer>
         </Column>
         <Column>
           <Item>
-            <TechnicalParameters />
+            <TechnicalParameters selectedStock={selectedStock} selectedPeriod={selectedPeriod} />
           </Item>
         </Column>
       </LazyColumnContainer>
@@ -53,4 +74,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default TechnicalAnalysis;
