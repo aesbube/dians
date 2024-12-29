@@ -64,7 +64,10 @@ def get_prediction(stock_id: str):
     if len(stock["data"]) == 0:
         raise HTTPException(
             status_code=404, detail="No data available for this stock")
-    return predictor(stock["data"])
+    prediction = predictor(stock["data"])
+    dates = prediction["dates"] + prediction["forecast_dates"]
+    prices = prediction["prices"] + prediction["forecast"]
+    return [dates[-min(100, len(dates)):], prices[-min(100, len(prices)):]]
 
 
 @app.get("/stocks/{stock_id}/chart")
@@ -84,7 +87,7 @@ def get_date_price(stock_id: str):
 
 
 @app.get("/technical_analysis/{stock_id}")
-def get_technical_analysis(stock_id: str, choice=30):
+def get_technical_analysis(stock_id: str):
     """
     Fetches the technical analysis for a specific stock ID.
     """
@@ -114,13 +117,12 @@ def get_technical_analysis(stock_id: str, choice=30):
     return results
 
 
-@app.get ("/fundamental_analysis/{stock_id}")
+@app.get("/fundamental_analysis/{stock_id}")
 def get_fundamental_analysis(stock_id: str):
     """
     Fetches the fundamental analysis for a specific stock ID.
     """
     stock = fundamental_collection.find_one({"_id": stock_id.upper()})
-    print(stock_id)
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {
                             stock_id} not found")

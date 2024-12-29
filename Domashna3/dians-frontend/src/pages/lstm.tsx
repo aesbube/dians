@@ -1,9 +1,9 @@
-import React, { lazy, Suspense, useState, useEffect } from "react";
-import LineChartComponent from "../content/line_graph";
+import { lazy, Suspense, useState, useEffect } from "react";
 import Dropdown from "../content/dropdown";
 import Item from "../components/item";
 import CircularProgress from "@mui/material/CircularProgress";
 import Row from "../components/row";
+import LstmComponent from "../content/lstm";
 
 
 const LazyRowContainer = lazy(
@@ -47,7 +47,7 @@ const Prediction = () => {
         <Row>
         <Item>
           {selectedStock && (
-            <LineChartComponent selectedStock={selectedStock} />
+            <LstmComponent selectedStock={selectedStock} />
           )}
         </Item>
         </Row>

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import DataTable from "../content/data_table";
 import Dropdown from "../content/dropdown";
 import Item from "../components/item";

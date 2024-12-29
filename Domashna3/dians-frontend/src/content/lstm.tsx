@@ -5,7 +5,7 @@ interface LineChartProps {
   selectedStock: string;
 }
 
-const LineChartComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
+const LstmComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
   const [xData, setXData] = useState<string[]>([]);
   const [yData, setYData] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,10 +17,9 @@ const LineChartComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:8000/stocks/${selectedStock}/chart`
+          `http://localhost:8000/lstm_predict/${selectedStock}`
         );
         const data = await response.json();
-
         setXData(data[0]);
         setYData(data[1]);
         console.log(xData[0], yData[0]);
@@ -54,4 +53,4 @@ const LineChartComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
   );
 };
 
-export default LineChartComponent;
+export default LstmComponent;
