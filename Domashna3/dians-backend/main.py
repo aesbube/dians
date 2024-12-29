@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from typing import List
 from Technical.tech_analysis import tech_results
 from LSTM.lstm_predictor import predictor
+from Fundamental.fundamental_analysis import get_fundamental_analysis
 
 
 app = FastAPI()
@@ -20,6 +21,7 @@ MONGO_URI = "mongodb://localhost:27017"
 client = MongoClient(MONGO_URI)
 db = client["stock_data"]
 collection = db["stock_records"]
+fundamental_collection = db["stock_fundamental"]
 
 
 @app.get("/")
@@ -110,3 +112,16 @@ def get_technical_analysis(stock_id: str, choice=30):
         results[period] = result
 
     return results
+
+
+@app.get ("/fundamental_analysis/{stock_id}")
+def get_fundamental_analysis(stock_id: str):
+    """
+    Fetches the fundamental analysis for a specific stock ID.
+    """
+    stock = fundamental_collection.find_one({"_id": stock_id.upper()})
+    print(stock_id)
+    if not stock:
+        raise HTTPException(status_code=404, detail=f"Stock ID {
+                            stock_id} not found")
+    return get_fundamental_analysis(stock["file"])
