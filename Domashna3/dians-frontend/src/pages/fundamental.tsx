@@ -2,7 +2,6 @@ import { lazy, Suspense, useState, useEffect } from "react";
 import Dropdown from "../content/dropdown";
 import Item from "../components/item";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Typography } from "@mui/material";
 import Column from "../components/column";
 import Fundamental from "../content/fundamental";
 
