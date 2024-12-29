@@ -1,11 +1,11 @@
-## Build and run
-#Backend
+# Build and run
+## Backend
 ```bash
 cd domashna3
 cd dians-backend
 uvicorn main:app --reload
 ```
-#Frontend
+## Frontend
 ```bash
 cd domashna3
 cd dians-frontend
