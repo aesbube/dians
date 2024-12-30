@@ -4,7 +4,8 @@ from pymongo import MongoClient
 from typing import List
 from Technical.tech_analysis import tech_results
 from LSTM.lstm_predictor import predictor
-from Fundamental.fundamental_analysis import get_fundamental_analysis
+from Fundamental.fundamental_analysis import get_fund_analysis
+from transformers import pipeline
 
 
 app = FastAPI()
@@ -23,6 +24,8 @@ db = client["stock_data"]
 collection = db["stock_records"]
 fundamental_collection = db["stock_fundamental"]
 
+pipe = pipeline("text-classification", model="ProsusAI/finbert", max_length=512)
+translator = pipeline("translation", model="Helsinki-NLP/opus-mt-mk-en", max_length=512)
 
 @app.get("/")
 def read_root():
@@ -126,4 +129,4 @@ def get_fundamental_analysis(stock_id: str):
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {
                             stock_id} not found")
-    return get_fundamental_analysis(stock["file"])
+    return get_fund_analysis(stock['file'][:min(512, len(stock['file']))], translator, pipe)
