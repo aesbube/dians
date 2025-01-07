@@ -1,4 +1,3 @@
-from Technical.tech_analysis import parse_data
 from datetime import datetime
 import numpy as np
 import pandas as pd
@@ -6,6 +5,21 @@ from sklearn.model_selection import train_test_split
 from keras.api.models import Sequential
 from keras.api.layers import LSTM, Dense
 import keras
+
+def parse_singular(entry: str):
+    return int(entry[:-8].replace('.', ''))
+
+
+def parse_data(data):
+    data_copy = []
+    for entry in data:
+        parsed = dict()
+        parsed['date'] = entry['date']
+        for part in ['last_transaction', 'max_value', 'min_value']:
+            parsed[part] = parse_singular(entry[part])
+        parsed["volume"] = int(entry["volume"][:].replace('.', ''))
+        data_copy.append(parsed)
+    return data_copy
 
 
 def predictor(data):

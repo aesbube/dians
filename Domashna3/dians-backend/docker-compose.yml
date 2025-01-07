@@ -1,0 +1,57 @@
+services:
+  api:
+    container_name: api-container
+    image: api:latest
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - dians_network
+
+  fundamental:
+    container_name: fundamental-container
+    image: fundamental:latest
+    build:
+      context: ./Fundamental
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    networks:
+      - dians_network
+
+  # fundamental_scraper:
+  #   container_name: fundamental-scraper-container
+  #   image: fundamental-scraper:latest
+  #   build:
+  #     context: ./Fundamental_scraper
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - dians_network
+
+  lstm:
+    container_name: lstm-container
+    image: lstm:latest
+    build:
+      context: ./LSTM
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    networks:
+      - dians_network
+
+  technical:
+    container_name: technical-container
+    image: technical:latest
+    build:
+      context: ./Technical
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    networks:
+      - dians_network
+
+networks:
+  dians_network:
+    driver: bridge

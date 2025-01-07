@@ -1,10 +1,11 @@
-version: '3.8'
-
 services:
-  app:
-    container_name: scraper-container
-    image: aesbube/scraper:latest
-    restart: unless-stopped
+  data-scraper:
+    container_name: data-scraper-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aesbube/data-scraper:latest
+    restart: no
     ports:
       - "3000:3000" 
     environment:

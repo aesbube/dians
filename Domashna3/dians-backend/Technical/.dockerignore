@@ -1,0 +1,11 @@
+/target
+.git
+.gitignore
+**/*.json
+*.rs.bk
+*.swp
+*.md
+*.pdf
+Dockerfile
+venv
+__pycache__
