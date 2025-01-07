@@ -5,6 +5,8 @@ import PyPDF2
 import pandas as pd
 import docx
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
 
 def download_file(url):
     """Download file from URL and return as bytes."""
@@ -36,7 +38,12 @@ def extract_text_from_docx(file_bytes):
 
 def save_to_database(seller, file_content):
     """Save the extracted text to MongoDB database."""
-    client = MongoClient('localhost', 27017)
+    path = os.path.join('../../../', '.env')
+    load_dotenv(dotenv_path=path)
+    
+    MONGO_URI = os.getenv("MONGO_URI")
+    
+    client = MongoClient(MONGO_URI)
     db = client.stock_data
     collection = db.stock_fundamental
     
