@@ -7,7 +7,6 @@ use mongodb::{
 use reqwest::Client;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
-use std::env;
 use std::time::Instant;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
