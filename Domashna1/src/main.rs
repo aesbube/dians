@@ -8,6 +8,7 @@ use reqwest::Client;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
+use std::env;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct StockData {
