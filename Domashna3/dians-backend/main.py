@@ -6,7 +6,11 @@ from Technical.tech_analysis import tech_results
 from LSTM.lstm_predictor import predictor
 from Fundamental.fundamental_analysis import get_fund_analysis
 from transformers import pipeline
+from dotenv import load_dotenv
+import os
 
+path = os.path.join('../../', '.env')
+load_dotenv(dotenv_path=path)
 
 app = FastAPI()
 
@@ -18,14 +22,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MONGO_URI = "mongodb://localhost:27017"
+# MONGO_URI = "mongodb://localhost:27017"
+MONGO_URI = os.getenv("MONGO_URI")
+
 client = MongoClient(MONGO_URI)
 db = client["stock_data"]
 collection = db["stock_records"]
 fundamental_collection = db["stock_fundamental"]
 
-pipe = pipeline("text-classification", model="ProsusAI/finbert", max_length=512)
-translator = pipeline("translation", model="Helsinki-NLP/opus-mt-mk-en", max_length=512)
+pipe = pipeline("text-classification",
+                model="ProsusAI/finbert", max_length=512)
+translator = pipeline(
+    "translation", model="Helsinki-NLP/opus-mt-mk-en", max_length=512)
+
 
 @app.get("/")
 def read_root():

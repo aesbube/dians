@@ -27,8 +27,10 @@ struct StockData {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = Instant::now();
     let client = Client::new();
+
+    dotenv::from_path("../.env").ok();
     
-    let mongo_uri = env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".to_string());
+    let mongo_uri = env::var("MONGO_URI").unwrap_or_else(|_| "mongodb://localhost:27017".to_string());
     let mongo_client = connect_to_mongodb(&mongo_uri).await?;
     let db = mongo_client.database("stock_data");
     let collection = db.collection::<Document>("stock_records");
