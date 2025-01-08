@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python", "-m", "uvicorn", "main:app", "--reload"]
+CMD ["python", "scraper.py"]

@@ -38,8 +38,8 @@ def extract_text_from_docx(file_bytes):
 
 def save_to_database(seller, file_content):
     """Save the extracted text to MongoDB database."""
-    path = os.path.join('../../../', '.env')
-    load_dotenv(dotenv_path=path)
+    # path = os.path.join('../../../', '.env')
+    # load_dotenv(dotenv_path=path)
     
     MONGO_URI = os.getenv("MONGO_URI")
     
@@ -81,7 +81,7 @@ def process_file(url, seller, file_type):
         return False
 
 if __name__ == "__main__":
-    sellers = requests.get('http://localhost:8000/stocks').json()
+    sellers = requests.get('http://api-container:8000/stocks').json()
     
     for seller in sellers:
         url = f'https://www.mse.mk/mk/symbol/{seller}'
