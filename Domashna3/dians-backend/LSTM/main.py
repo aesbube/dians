@@ -5,8 +5,8 @@ from pymongo import MongoClient
 from lstm_predictor import predictor
 from dotenv import load_dotenv
 
-path = os.path.join('../../../', '.env')
-load_dotenv(dotenv_path=path)
+# path = os.path.join('../../../', '.env')
+# load_dotenv(dotenv_path=path)
 
 app = FastAPI()
 

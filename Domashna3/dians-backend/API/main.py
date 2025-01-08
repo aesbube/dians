@@ -7,8 +7,8 @@ import os
 
 import requests
 
-path = os.path.join('../../../', '.env')
-load_dotenv(dotenv_path=path)
+# path = os.path.join('../../../', '.env')
+# load_dotenv(dotenv_path=path)
 
 app = FastAPI()
 
@@ -76,7 +76,7 @@ def get_fundamental_analysis(stock_id: str):
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """
     try:
-        response = requests.get(f"http://localhost:8001/fundamental_analysis/{stock_id}")
+        response = requests.get(f"http://fundamental-container:8000/fundamental_analysis/{stock_id}")
         if response.status_code == 200:
             return response.json()
         else:
@@ -91,7 +91,7 @@ def get_lstm(stock_id: str):
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """
     try:
-        response = requests.get(f"http://localhost:8002/lstm_predict/{stock_id}")
+        response = requests.get(f"http://lstm-container:8000/lstm_predict/{stock_id}")
         if response.status_code == 200:
             return response.json()
         else:
@@ -106,7 +106,7 @@ def get_lstm(stock_id: str):
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """
     try:
-        response = requests.get(f"http://localhost:8003/technical_analysis/{stock_id}")
+        response = requests.get(f"http://technical-container:8000/technical_analysis/{stock_id}")
         if response.status_code == 200:
             return response.json()
         else:

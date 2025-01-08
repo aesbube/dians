@@ -7,8 +7,8 @@ from fundamental_analysis import get_fund_analysis
 from dotenv import load_dotenv
 import os
 
-path = os.path.join('../../../', '.env')
-load_dotenv(dotenv_path=path)
+# path = os.path.join('../../../', '.env')
+# load_dotenv(dotenv_path=path)
 
 pipe = pipeline("text-classification",
                 model="ProsusAI/finbert", max_length=512)
