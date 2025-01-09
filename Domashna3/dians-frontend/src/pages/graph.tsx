@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import LineChartComponent from "../content/line_graph";
 import Dropdown from "../content/dropdown";
 import Item from "../components/item";

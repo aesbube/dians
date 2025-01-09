@@ -1,0 +1,104 @@
+services:
+  data-scraper:
+    container_name: data-scraper-container
+    build:
+      context: ../Domashna1/
+      dockerfile: Dockerfile
+    image: aesbube/data-scraper:latest
+    restart: no
+    ports:
+      - "3000:3000" 
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./app:/app   
+    command: ["Scraper"] 
+    env_file:
+      - .env
+
+  api:
+    container_name: api-container
+    image: api:latest
+    build:
+      context: ../Domashna3/dians-backend/API
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - dians_network
+    env_file:
+      - .env
+
+  fundamental:
+    container_name: fundamental-container
+    image: fundamental:latest
+    build:
+      context: ../Domashna3/dians-backend/Fundamental
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    networks:
+      - dians_network
+    env_file:
+      - .env
+
+  fundamental_scraper:
+    container_name: fundamental-scraper-container
+    image: fundamental-scraper:latest
+    restart: no
+    build:
+      context: ../Domashna3/dians-backend/Fundamental_scraper
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8000"
+    networks:
+      - dians_network
+    env_file:
+      - .env
+    depends_on:
+      - api
+
+  lstm:
+    container_name: lstm-container
+    image: lstm:latest
+    build:
+      context: ../Domashna3/dians-backend/LSTM
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    networks:
+      - dians_network
+    env_file:
+      - .env
+
+  technical:
+    container_name: technical-container
+    image: technical:latest
+    build:
+      context: ../Domashna3/dians-backend/Technical
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8000"
+    networks:
+      - dians_network
+    env_file:
+      - .env
+  
+  frontend:
+    container_name: dians-frontend
+    image: dians-frontend:latest
+    restart: unless-stopped
+    build: 
+      context: ../Domashna3/dians-frontend/
+      dockerfile: Dockerfile
+    ports:
+      - "9000:3000"
+    networks:
+      - dians_network
+    depends_on:
+      - api
+
+networks:
+  dians_network:
+    driver: bridge
+
