@@ -45,7 +45,7 @@ const FundamentalAnalysis = () => {
         </Column>
         <Column>
           <Item>
-            <Fundamental stock={selectedStock} />
+            {selectedStock && <Fundamental stock={selectedStock} />}
           </Item>
         </Column>
       </LazyColumnContainer>

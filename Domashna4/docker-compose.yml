@@ -4,7 +4,7 @@ services:
     build:
       context: ../Domashna1/
       dockerfile: Dockerfile
-    image: aesbube/data-scraper:latest
+    image: data-scraper:latest
     restart: no
     ports:
       - "3000:3000" 
