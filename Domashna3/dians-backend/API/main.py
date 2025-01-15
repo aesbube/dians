@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from typing import List
@@ -7,18 +8,23 @@ import os
 
 import requests
 
-# path = os.path.join('../../../', '.env')
-# load_dotenv(dotenv_path=path)
-
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:9000"],
+    allow_origins=["https://dians.azurewebsites.net"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+API_KEY = os.getenv("API_KEY")
+
+api_key_header = APIKeyHeader(name="x-api-key")
+
+def validate_api_key(api_key: str = Depends(api_key_header)):
+    if api_key != API_KEY:
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid API Key")
 
 MONGO_URI = os.getenv("MONGO_URI")
 
@@ -33,7 +39,7 @@ def read_root():
 
 
 @app.get("/stocks", response_model=List[str])
-def get_stock_ids():
+def get_stock_ids(api_key: str = Depends(validate_api_key)):
     """
     Fetches all unique stock IDs (_id) from the collection.
     """
@@ -44,7 +50,7 @@ def get_stock_ids():
 
 
 @app.get("/stocks/{stock_id}")
-def get_stock_data(stock_id: str):
+def get_stock_data(stock_id: str, api_key: str = Depends(validate_api_key)):
     """
     Fetches the data array for a specific stock ID.
     """
@@ -55,7 +61,7 @@ def get_stock_data(stock_id: str):
 
 
 @app.get("/stocks/{stock_id}/chart")
-def get_date_price(stock_id: str):
+def get_date_price(stock_id: str, api_key: str = Depends(validate_api_key)):
     """
     Fetches the date and price for a specific stock ID.
     """
@@ -70,7 +76,7 @@ def get_date_price(stock_id: str):
 
 
 @app.get("/fundamental_analysis/{stock_id}")
-def get_fundamental_analysis(stock_id: str):
+def get_fundamental_analysis(stock_id: str, api_key: str = Depends(validate_api_key)):
     """
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """
@@ -85,7 +91,7 @@ def get_fundamental_analysis(stock_id: str):
     
     
 @app.get("/lstm_predict/{stock_id}")
-def get_lstm(stock_id: str):
+def get_lstm(stock_id: str, api_key: str = Depends(validate_api_key)):
     """
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """
@@ -100,7 +106,7 @@ def get_lstm(stock_id: str):
     
     
 @app.get("/technical_analysis/{stock_id}")
-def get_lstm(stock_id: str):
+def get_lstm(stock_id: str, api_key: str = Depends(validate_api_key)):
     """
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """

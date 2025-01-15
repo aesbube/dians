@@ -17,7 +17,13 @@ const LineChartComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:8000/stocks/${selectedStock}/chart`
+          "https://apidians.azurewebsites.net/stocks/${selectedStock}/chart",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": import.meta.env.VITE_API_KEY,
+            },
+          }
         );
         const data = await response.json();
 

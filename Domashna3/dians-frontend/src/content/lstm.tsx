@@ -17,7 +17,13 @@ const LstmComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:8000/lstm_predict/${selectedStock}`
+          "https://apidians.azurewebsites.net/lstm_predict/${selectedStock}",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": import.meta.env.VITE_API_KEY,
+            },
+          }
         );
         const data = await response.json();
         setXData(data[0]);

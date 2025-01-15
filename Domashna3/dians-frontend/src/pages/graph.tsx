@@ -18,7 +18,15 @@ const GraphPage = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await fetch("http://localhost:8000/stocks");
+        const response = await fetch(
+          "https://apidians.azurewebsites.net/stocks",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": import.meta.env.VITE_API_KEY,
+            },
+          }
+        );
         const data = await response.json();
         setOptions(data);
 

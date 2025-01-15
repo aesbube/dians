@@ -39,7 +39,13 @@ const TechnicalParameters: React.FC<TechnicalParametersProps> = ({
         setLoading(true);
         setError(null); 
         const response = await fetch(
-          `http://localhost:8000/technical_analysis/${selectedStock}`
+          "https://apidians.azurewebsites.net/technical_analysis/${selectedStock}",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": import.meta.env.VITE_API_KEY,
+            },
+          }
         );
 
         if (!response.ok) {

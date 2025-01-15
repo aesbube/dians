@@ -13,7 +13,13 @@ const Fundamental: React.FC<FundamentalProps> = ({ stock }) => {
     const fetchFundamentalAnalysis = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/fundamental_analysis/${stock}`
+          "https://apidians.azurewebsites.net/fundamental_analysis/${stock}",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": import.meta.env.VITE_API_KEY,
+            },
+          }
         );
 
         if (!response.ok) {

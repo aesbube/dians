@@ -16,7 +16,15 @@ const FundamentalAnalysis = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await fetch("http://localhost:8000/stocks");
+        const response = await fetch(
+          "https://apidians.azurewebsites.net/stocks",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": import.meta.env.VITE_API_KEY,
+            },
+          }
+        );
         const data = await response.json();
         setOptions(data);
 
@@ -44,9 +52,7 @@ const FundamentalAnalysis = () => {
           </Item>
         </Column>
         <Column>
-          <Item>
-            {selectedStock && <Fundamental stock={selectedStock} />}
-          </Item>
+          <Item>{selectedStock && <Fundamental stock={selectedStock} />}</Item>
         </Column>
       </LazyColumnContainer>
     </Suspense>

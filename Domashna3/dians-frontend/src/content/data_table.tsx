@@ -16,7 +16,13 @@ const DataTable: React.FC<DataTableProps> = ({ selectedStock }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:8000/stocks/${selectedStock}`
+          "https://apidians.azurewebsites.net/stocks/${selectedStock}",
+          {
+            method: "GET",
+            headers: {
+              "x-api-key": import.meta.env.VITE_API_KEY,
+            },
+          }
         );
         const data = await response.json();
 

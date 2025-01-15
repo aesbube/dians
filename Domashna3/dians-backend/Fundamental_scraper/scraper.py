@@ -81,30 +81,44 @@ def process_file(url, seller, file_type):
         return False
 
 if __name__ == "__main__":
-    sellers = requests.get('http://api-container:8000/stocks').json()
+    API_KEY = os.getenv("API_KEY")
+    headers = {"x-api-key": API_KEY}
     
-    for seller in sellers:
-        url = f'https://www.mse.mk/mk/symbol/{seller}'
-        response = requests.get(url)
-        soup = bs.BeautifulSoup(response.text, 'html.parser')
-        li_elements = soup.select('div#seiNetIssuerLatestNews a')
-        if not li_elements:
-            print(f"No files found for seller {seller}")
-            continue
-        link = [a['href'] for a in li_elements if 'href' in a.attrs][0]
-        id = link.split('/')[-1]
-        url_link = f'https://api.seinet.com.mk/public/documents/single/{id}'
-        json = requests.get(url_link).json()
-        if 'content' in json['data']:
-            content = json['data']['content']
-            content = bs.BeautifulSoup(content, 'html.parser').get_text()
-        if 'attachments' in json['data'] and len(json['data']['attachments']) > 0:
-            file = json['data']['attachments'][0]['attachmentId']
-            url_file = f'https://api.seinet.com.mk/public/documents/attachment/{file}'
-            file_type = json['data']['attachments'][0]['fileName'].split('.')[-1]
-            text = process_file(url_file, seller, file_type)
-        text_full = content + text if content and text else content or text
-        if text_full:
-            save_to_database(seller, text_full)
-        if text or content:
-            print(f"Successfully processed file for seller {seller}")
+    try:
+        sellers = requests.get('https://apidians.azurewebsites.net/stocks', headers=headers).json()
+        
+        for seller in sellers:
+            url = f'https://www.mse.mk/mk/symbol/{seller}'
+            response = requests.get(url)
+            soup = bs.BeautifulSoup(response.text, 'html.parser')
+            li_elements = soup.select('div#seiNetIssuerLatestNews a')
+            
+            if not li_elements:
+                print(f"No files found for seller {seller}")
+                continue
+            
+            link = [a['href'] for a in li_elements if 'href' in a.attrs][0]
+            id = link.split('/')[-1]
+            url_link = f'https://api.seinet.com.mk/public/documents/single/{id}'
+            json = requests.get(url_link).json()
+            
+            content = ""
+            if 'content' in json['data']:
+                content = json['data']['content']
+                content = bs.BeautifulSoup(content, 'html.parser').get_text()
+            
+            if 'attachments' in json['data'] and len(json['data']['attachments']) > 0:
+                file = json['data']['attachments'][0]['attachmentId']
+                url_file = f'https://api.seinet.com.mk/public/documents/attachment/{file}'
+                file_type = json['data']['attachments'][0]['fileName'].split('.')[-1]
+                text = process_file(url_file, seller, file_type)
+                
+                text_full = content + text if content and text else content or text
+                if text_full:
+                    save_to_database(seller, text_full)
+                
+            if text or content:
+                print(f"Successfully processed file for seller {seller}")
+    
+    except Exception as e:
+        print(f"Error: {str(e)}")
