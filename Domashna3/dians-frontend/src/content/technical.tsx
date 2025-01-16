@@ -51,7 +51,7 @@ const TechnicalParameters: React.FC<TechnicalParametersProps> = ({
           return;
         }
         const response = await fetch(
-          "https://apidians.azurewebsites.net/fundamental_analysis/${stock}",
+          "https://apidians.azurewebsites.net/technical/${stock}",
           {
             method: "GET",
             headers: {

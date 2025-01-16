@@ -29,7 +29,7 @@ const LineChartComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
           return;
         }
         const response = await fetch(
-          "https://apidians.azurewebsites.net/fundamental_analysis/${stock}",
+          "https://apidians.azurewebsites.net/stocks/${stock}/chart",
           {
             method: "GET",
             headers: {

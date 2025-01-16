@@ -27,7 +27,7 @@ const Fundamental: React.FC<FundamentalProps> = ({ stock }) => {
           return;
         }
         const response = await fetch(
-          "https://apidians.azurewebsites.net/fundamental_analysis/${stock}",
+          "https://apidians.azurewebsites.net/fundamental/${stock}",
           {
             method: "GET",
             headers: {
