@@ -36,14 +36,26 @@ const TechnicalParameters: React.FC<TechnicalParametersProps> = ({
 
     const fetchTechnicalAnalysisData = async () => {
       try {
-        setLoading(true);
-        setError(null); 
+        const getCookie = (name: string): string | undefined => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) {
+            return parts.pop()?.split(";").shift();
+          }
+          return undefined;
+        };
+
+        const apiKey = getCookie("API_KEY");
+        if (!apiKey) {
+          setError("API key not found.");
+          return;
+        }
         const response = await fetch(
-          "https://apidians.azurewebsites.net/technical_analysis/${selectedStock}",
+          "https://apidians.azurewebsites.net/fundamental_analysis/${stock}",
           {
             method: "GET",
             headers: {
-              "x-api-key": import.meta.env.VITE_API_KEY,
+              "x-api-key": apiKey?.toString(),
             },
           }
         );

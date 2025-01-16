@@ -15,13 +15,25 @@ const LineChartComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
 
     const fetchChartData = async () => {
       try {
-        setLoading(true);
+        const getCookie = (name: string): string | undefined => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) {
+            return parts.pop()?.split(";").shift();
+          }
+          return undefined;
+        };
+
+        const apiKey = getCookie("API_KEY");
+        if (!apiKey) {
+          return;
+        }
         const response = await fetch(
-          "https://apidians.azurewebsites.net/stocks/${selectedStock}/chart",
+          "https://apidians.azurewebsites.net/fundamental_analysis/${stock}",
           {
             method: "GET",
             headers: {
-              "x-api-key": import.meta.env.VITE_API_KEY,
+              "x-api-key": apiKey?.toString(),
             },
           }
         );
