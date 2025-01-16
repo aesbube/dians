@@ -1,35 +1,46 @@
 import os
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from tech_analysis import tech_results
 from dotenv import load_dotenv
 
-# path = os.path.join('../../../', '.env')
-# load_dotenv(dotenv_path=path)
-
-app = FastAPI()
+# path = os.path.join('../../', '.env')
+load_dotenv()
 
 MONGO_URI = os.getenv("MONGO_URI")
-
 client = MongoClient(MONGO_URI)
 db = client["stock_data"]
 collection = db["stock_records"]
+results = db["stocks_results"]
 
 
-@app.get("/technical_analysis/{stock_id}")
-def get_technical_analysis(stock_id: str):
+def save_to_database(seller, content):
+    """
+    Save the extracted text to MongoDB database.
+    """
+    update_data = {
+        "$set": {
+            "technical": content
+        }
+    }
+
+    results.update_one(
+        {"_id": seller},
+        update_data,
+        upsert=True
+    )
+
+
+def get_technical(stock_id: str):
     """
     Fetches the technical analysis for a specific stock ID.
     """
     stock = collection.find_one({"_id": stock_id.upper()})
 
     if not stock:
-        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
+        return None
 
     if len(stock["data"]) < 2:
-        raise HTTPException(
-            status_code=404, detail="No data available for this stock")
+        return None
 
     periods = {
         "day": 2,
@@ -37,11 +48,18 @@ def get_technical_analysis(stock_id: str):
         "month": 30
     }
 
-    results = dict()
+    result = dict()
 
     for period, num in periods.items():
         days = min(num, len(stock["data"]))
-        result = tech_results(stock["data"][:days], days)
-        results[period] = result
+        result_period = tech_results(stock["data"][:days], days)
+        result[period] = result_period
 
-    return results
+    save_to_database(stock_id, result)
+    return result
+
+
+if __name__ == "__main__":
+    for stock in collection.find().distinct("_id"):
+        get_technical(stock)
+    client.close()

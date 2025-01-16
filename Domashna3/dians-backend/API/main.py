@@ -6,8 +6,6 @@ from typing import List
 from dotenv import load_dotenv
 import os
 
-import requests
-
 app = FastAPI()
 
 app.add_middleware(
@@ -24,13 +22,16 @@ api_key_header = APIKeyHeader(name="x-api-key")
 
 def validate_api_key(api_key: str = Depends(api_key_header)):
     if api_key != API_KEY:
-        raise HTTPException(status_code=403, detail="Forbidden: Invalid API Key")
+        raise HTTPException(
+            status_code=403, detail="Forbidden: Invalid API Key")
+
 
 MONGO_URI = os.getenv("MONGO_URI")
 
 client = MongoClient(MONGO_URI)
 db = client["stock_data"]
 collection = db["stock_records"]
+results = db["stocks_results"]
 
 
 @app.get("/")
@@ -75,47 +76,43 @@ def get_date_price(stock_id: str, api_key: str = Depends(validate_api_key)):
     return (dates[::-1], prices[::-1])
 
 
-@app.get("/fundamental_analysis/{stock_id}")
-def get_fundamental_analysis(stock_id: str, api_key: str = Depends(validate_api_key)):
+@app.get("/fundamental/{stock_id}")
+def get_fundamental(stock_id: str, api_key: str = Depends(validate_api_key)):
     """
-    Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
+    Fetches the fundamental analysis for a specific stock ID.
     """
-    try:
-        response = requests.get(f"http://localhost:8001/fundamental_analysis/{stock_id}")
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise HTTPException(status_code=response.status_code, detail="Error fetching data from the service")
-    except requests.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"Error with the request: {e}")
-    
-    
-@app.get("/lstm_predict/{stock_id}")
+    stock = results.find_one({"_id": stock_id.upper()})
+    if not stock:
+        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
+    result = stock["fundamental"]
+    if not result:
+        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} fundamental not found")
+    return result
+
+
+@app.get("/technical/{stock_id}")
+def get_technical(stock_id: str, api_key: str = Depends(validate_api_key)):
+    """
+    Fetches the technical analysis for a specific stock ID.
+    """
+    stock = results.find_one({"_id": stock_id.upper()})
+    if not stock:
+        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
+    result = stock["technical"]
+    if not result:
+        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} technical not found")
+    return result
+
+
+@app.get("/lstm/{stock_id}")
 def get_lstm(stock_id: str, api_key: str = Depends(validate_api_key)):
     """
-    Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
+    Fetches the lstm analysis for a specific stock ID.
     """
-    try:
-        response = requests.get(f"http://localhost:8002/lstm_predict/{stock_id}")
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise HTTPException(status_code=response.status_code, detail="Error fetching data from the service")
-    except requests.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"Error with the request: {e}")
-    
-    
-@app.get("/technical_analysis/{stock_id}")
-def get_lstm(stock_id: str, api_key: str = Depends(validate_api_key)):
-    """
-    Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
-    """
-    try:
-        response = requests.get(f"http://localhost:8003/technical_analysis/{stock_id}")
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise HTTPException(status_code=response.status_code, detail="Error fetching data from the service")
-    except requests.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"Error with the request: {e}")
- 
+    stock = results.find_one({"_id": stock_id.upper()})
+    if not stock:
+        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
+    result = stock["lstm"]
+    if not result:
+        raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} lstm not found")
+    return result

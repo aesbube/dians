@@ -8,4 +8,5 @@
 *.pdf
 Dockerfile
 venv
+.env
 __pycache__
