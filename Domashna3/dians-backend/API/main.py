@@ -85,7 +85,7 @@ def get_fundamental(stock_id: str, api_key: str = Depends(validate_api_key)):
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
     result = stock["fundamental"]
-    if not result:
+    if result is None:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} fundamental not found")
     return result
 
