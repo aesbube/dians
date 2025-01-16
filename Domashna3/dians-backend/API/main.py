@@ -81,7 +81,7 @@ def get_fundamental_analysis(stock_id: str, api_key: str = Depends(validate_api_
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """
     try:
-        response = requests.get(f"http://fundamental-container:8000/fundamental_analysis/{stock_id}")
+        response = requests.get(f"http://fundamental-container:8001/fundamental_analysis/{stock_id}")
         if response.status_code == 200:
             return response.json()
         else:
@@ -96,7 +96,7 @@ def get_lstm(stock_id: str, api_key: str = Depends(validate_api_key)):
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """
     try:
-        response = requests.get(f"http://lstm-container:8000/lstm_predict/{stock_id}")
+        response = requests.get(f"http://lstm-container:8002/lstm_predict/{stock_id}")
         if response.status_code == 200:
             return response.json()
         else:
@@ -111,7 +111,7 @@ def get_lstm(stock_id: str, api_key: str = Depends(validate_api_key)):
     Fetches the fundamental analysis for a specific stock ID by querying another service on localhost:8001.
     """
     try:
-        response = requests.get(f"http://technical-container:8000/technical_analysis/{stock_id}")
+        response = requests.get(f"http://technical-container:8003/technical_analysis/{stock_id}")
         if response.status_code == 200:
             return response.json()
         else:

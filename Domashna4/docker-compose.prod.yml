@@ -27,7 +27,7 @@ services:
     container_name: fundamental-container
     image: aesbube/fundamental:latest
     ports:
-      - "8001:8000"
+      - "8001:8001"
     networks:
       - dians_network
     env_file:
@@ -60,7 +60,7 @@ services:
     container_name: technical-container
     image: aesbube/technical:latest
     ports:
-      - "8003:8000"
+      - "8003:8003"
     networks:
       - dians_network
     env_file:
