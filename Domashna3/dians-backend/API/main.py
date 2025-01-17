@@ -85,7 +85,7 @@ def get_fundamental(stock_id: str, api_key: str = Depends(validate_api_key)):
     stock = results.find_one({"_id": stock_id.upper()})
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
-    result = stock["fundamental"]
+    result = stock.get("fundamental")
     if result is None:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} fundamental not found")
     return result
@@ -99,7 +99,7 @@ def get_technical(stock_id: str, api_key: str = Depends(validate_api_key)):
     stock = results.find_one({"_id": stock_id.upper()})
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
-    result = stock["technical"]
+    result = stock.get("technical")
     if not result:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} technical not found")
     return result
@@ -113,7 +113,7 @@ def get_lstm(stock_id: str, api_key: str = Depends(validate_api_key)):
     stock = results.find_one({"_id": stock_id.upper()})
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
-    result = stock["lstm"]
+    result = stock.get("lstm")
     if result is None:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} lstm not found")
     return result
