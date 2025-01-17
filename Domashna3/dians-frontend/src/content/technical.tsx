@@ -36,16 +36,6 @@ const TechnicalParameters: React.FC<TechnicalParametersProps> = ({
 
     const fetchTechnicalAnalysisData = async () => {
       try {
-        // const getCookie = (name: string): string | undefined => {
-        //   const value = `; ${document.cookie}`;
-        //   const parts = value.split(`; ${name}=`);
-        //   if (parts.length === 2) {
-        //     return parts.pop()?.split(";").shift();
-        //   }
-        //   return undefined;
-        // };
-
-        // const apiKey = getCookie("API_KEY");
         const target = `https://apidians.azurewebsites.net/technical/${selectedStock}`;
         const apiUrl = `https://proxydians.azurewebsites.net/api/proxy`;
         const response = await fetch(apiUrl, {

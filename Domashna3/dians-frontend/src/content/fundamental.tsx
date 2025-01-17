@@ -12,16 +12,6 @@ const Fundamental: React.FC<FundamentalProps> = ({ stock }) => {
   useEffect(() => {
     const fetchFundamentalAnalysis = async () => {
       try {
-        // const getCookie = (name: string): string | undefined => {
-        //   const value = `; ${document.cookie}`;
-        //   const parts = value.split(`; ${name}=`);
-        //   if (parts.length === 2) {
-        //     return parts.pop()?.split(";").shift();
-        //   }
-        //   return undefined;
-        // };
-
-        // const apiKey = getCookie("API_KEY");
         const target = `https://apidians.azurewebsites.net/fundamental/${stock}`;
         const apiUrl = `https://proxydians.azurewebsites.net/api/proxy`;
         const response = await fetch(apiUrl, {
