@@ -7,5 +7,6 @@
 *.md
 *.pdf
 Dockerfile
+.env
 venv
 __pycache__

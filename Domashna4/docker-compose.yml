@@ -28,6 +28,19 @@ services:
       - dians_network
     env_file:
       - .env
+  
+  bff:
+    container_name: bff-container
+    image: aesbube/bff:latest
+    build:
+      context: ../Domashna3/bff
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - dians_network
+    env_file:
+      - .env
 
   fundamental:
     container_name: fundamental-container

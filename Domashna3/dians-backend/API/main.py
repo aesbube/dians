@@ -10,7 +10,8 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://dians.azurewebsites.net"],
+    # allow_origins=["https://dians.azurewebsites.net"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -113,6 +114,6 @@ def get_lstm(stock_id: str, api_key: str = Depends(validate_api_key)):
     if not stock:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} not found")
     result = stock["lstm"]
-    if not result:
+    if result is None:
         raise HTTPException(status_code=404, detail=f"Stock ID {stock_id} lstm not found")
     return result

@@ -5,6 +5,7 @@ import Item from "../components/item";
 import Column from "../components/column";
 import CircularProgress from "@mui/material/CircularProgress";
 
+
 const LazyColumnContainer = lazy(() => import("../components/column_container"));
 
 const HomePage = () => {
@@ -14,15 +15,17 @@ const HomePage = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await fetch(
-          "https://apidians.azurewebsites.net/stocks",
-          {
-            method: "GET",
-            headers: {
-              "x-api-key": import.meta.env.VITE_API_KEY,
-            },
-          }
-        );
+        const target = `https://apidians.azurewebsites.net/stocks`;
+        const apiUrl = `http://localhost:80/api/proxy`;
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: target,
+          }),
+        });
         const data = await response.json();
         setOptions(data);
 

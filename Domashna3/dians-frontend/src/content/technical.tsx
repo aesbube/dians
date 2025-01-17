@@ -29,36 +29,34 @@ const TechnicalParameters: React.FC<TechnicalParametersProps> = ({
   const [ichimokuBaseLine, setIchimokuBaseLine] = useState<number>(0);
   const [overallSignal, setOverallSignal] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); 
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedStock) return;
 
     const fetchTechnicalAnalysisData = async () => {
       try {
-        const getCookie = (name: string): string | undefined => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) {
-            return parts.pop()?.split(";").shift();
-          }
-          return undefined;
-        };
+        // const getCookie = (name: string): string | undefined => {
+        //   const value = `; ${document.cookie}`;
+        //   const parts = value.split(`; ${name}=`);
+        //   if (parts.length === 2) {
+        //     return parts.pop()?.split(";").shift();
+        //   }
+        //   return undefined;
+        // };
 
-        const apiKey = getCookie("API_KEY");
-        if (!apiKey) {
-          setError("API key not found.");
-          return;
-        }
-        const response = await fetch(
-          "https://apidians.azurewebsites.net/technical/${stock}",
-          {
-            method: "GET",
-            headers: {
-              "x-api-key": apiKey?.toString(),
-            },
-          }
-        );
+        // const apiKey = getCookie("API_KEY");
+        const target = `https://apidians.azurewebsites.net/technical/${selectedStock}`;
+        const apiUrl = `http://localhost:80/api/proxy`;
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: target,
+          }),
+        });
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -69,6 +67,8 @@ const TechnicalParameters: React.FC<TechnicalParametersProps> = ({
           console.error(error);
           return;
         }
+
+        setError(null);
 
         const rawData = await response.json();
         const data = rawData[selectedPeriod.toLowerCase()];

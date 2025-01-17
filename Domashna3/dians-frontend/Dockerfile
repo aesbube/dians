@@ -14,6 +14,8 @@ FROM node:16-alpine AS production
 
 WORKDIR /app
 
+ENV API_KEY=<your_api_key_here>
+
 RUN npm install -g serve
 
 COPY --from=build /app/dist ./dist

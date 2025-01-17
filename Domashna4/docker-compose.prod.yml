@@ -23,6 +23,16 @@ services:
     env_file:
       - .env
 
+  bff:
+    container_name: bff-container
+    image: aesbube/bff:latest
+    ports:
+      - "80:80"
+    networks:
+      - dians_network
+    env_file:
+      - .env
+
   fundamental:
     container_name: fundamental-container
     image: aesbube/fundamental:latest

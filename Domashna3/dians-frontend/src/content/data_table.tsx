@@ -14,30 +14,28 @@ const DataTable: React.FC<DataTableProps> = ({ selectedStock }) => {
 
     const fetchData = async () => {
       try {
-        const getCookie = (name: string): string | undefined => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) {
-            return parts.pop()?.split(";").shift();
-          }
-          return undefined;
-        };
+        //   const getCookie = (name: string): string | undefined => {
+        //     const value = `; ${document.cookie}`;
+        //     const parts = value.split(`; ${name}=`);
+        //     if (parts.length === 2) {
+        //       return parts.pop()?.split(";").shift();
+        //     }
+        //     return undefined;
+        //   };
 
-        const apiKey = getCookie("API_KEY");
-        if (!apiKey) {
-          return;
-        }
-        const response = await fetch(
-          "https://apidians.azurewebsites.net/stocks/${stock}",
-          {
-            method: "GET",
-            headers: {
-              "x-api-key": apiKey?.toString(),
-            },
-          }
-        );
+        // const apiKey = getCookie("API_KEY");
+        const target = `https://apidians.azurewebsites.net/stocks/${selectedStock}`;
+        const apiUrl = `http://localhost:80/api/proxy`;
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: target,
+          }),
+        });
         const data = await response.json();
-
         const transformedData = data.map(
           (
             item: {

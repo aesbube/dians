@@ -6,6 +6,7 @@ import Row from "../components/row";
 import LstmComponent from "../content/lstm";
 
 
+
 const LazyRowContainer = lazy(
   () => import("../components/row_container")
 );
@@ -17,15 +18,17 @@ const Prediction = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await fetch(
-          "https://apidians.azurewebsites.net/stocks",
-          {
-            method: "GET",
-            headers: {
-              "x-api-key": import.meta.env.VITE_API_KEY,
-            },
-          }
-        );
+        const target = `https://apidians.azurewebsites.net/stocks`;
+        const apiUrl = `http://localhost:80/api/proxy`;
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: target,
+          }),
+        });
         const data = await response.json();
         setOptions(data);
 
