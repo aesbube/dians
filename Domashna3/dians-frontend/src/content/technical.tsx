@@ -47,7 +47,7 @@ const TechnicalParameters: React.FC<TechnicalParametersProps> = ({
 
         // const apiKey = getCookie("API_KEY");
         const target = `https://apidians.azurewebsites.net/technical/${selectedStock}`;
-        const apiUrl = `http://localhost:80/api/proxy`;
+        const apiUrl = `https://proxydians.azurewebsites.net/api/proxy`;
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {

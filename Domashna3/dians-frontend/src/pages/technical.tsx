@@ -22,7 +22,7 @@ const TechnicalAnalysis = () => {
     const fetchOptions = async () => {
       try {
         const target = `https://apidians.azurewebsites.net/stocks`;
-        const apiUrl = `http://localhost:80/api/proxy`;
+        const apiUrl = `https://proxydians.azurewebsites.net/api/proxy`;
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {

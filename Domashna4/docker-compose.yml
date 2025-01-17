@@ -28,12 +28,12 @@ services:
       - dians_network
     env_file:
       - .env
-  
-  bff:
-    container_name: bff-container
-    image: aesbube/bff:latest
+      
+  proxy:
+    container_name: proxy-container
+    image: aesbube/proxy:latest
     build:
-      context: ../Domashna3/bff
+      context: ../Domashna3/proxy
       dockerfile: Dockerfile
     ports:
       - "80:80"
@@ -105,7 +105,7 @@ services:
       context: ../Domashna3/dians-frontend/
       dockerfile: Dockerfile
     ports:
-      - "9000:3000"
+      - "3000:3000"
     networks:
       - dians_network
     depends_on:

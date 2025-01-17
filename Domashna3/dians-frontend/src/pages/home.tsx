@@ -5,8 +5,9 @@ import Item from "../components/item";
 import Column from "../components/column";
 import CircularProgress from "@mui/material/CircularProgress";
 
-
-const LazyColumnContainer = lazy(() => import("../components/column_container"));
+const LazyColumnContainer = lazy(
+  () => import("../components/column_container")
+);
 
 const HomePage = () => {
   const [selectedStock, setSelectedStock] = useState<string>("");
@@ -16,7 +17,7 @@ const HomePage = () => {
     const fetchOptions = async () => {
       try {
         const target = `https://apidians.azurewebsites.net/stocks`;
-        const apiUrl = `http://localhost:80/api/proxy`;
+        const apiUrl = `https://proxydians.azurewebsites.net/api/proxy`;
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {

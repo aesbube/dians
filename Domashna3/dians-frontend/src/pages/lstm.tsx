@@ -5,11 +5,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Row from "../components/row";
 import LstmComponent from "../content/lstm";
 
-
-
-const LazyRowContainer = lazy(
-  () => import("../components/row_container")
-);
+const LazyRowContainer = lazy(() => import("../components/row_container"));
 
 const Prediction = () => {
   const [selectedStock, setSelectedStock] = useState<string>("");
@@ -19,7 +15,7 @@ const Prediction = () => {
     const fetchOptions = async () => {
       try {
         const target = `https://apidians.azurewebsites.net/stocks`;
-        const apiUrl = `http://localhost:80/api/proxy`;
+        const apiUrl = `https://proxydians.azurewebsites.net/api/proxy`;
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {
@@ -56,11 +52,9 @@ const Prediction = () => {
           </Item>
         </Row>
         <Row>
-        <Item>
-          {selectedStock && (
-            <LstmComponent selectedStock={selectedStock} />
-          )}
-        </Item>
+          <Item>
+            {selectedStock && <LstmComponent selectedStock={selectedStock} />}
+          </Item>
         </Row>
       </LazyRowContainer>
     </Suspense>
@@ -68,4 +62,3 @@ const Prediction = () => {
 };
 
 export default Prediction;
-

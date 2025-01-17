@@ -26,7 +26,7 @@ const LineChartComponent: React.FC<LineChartProps> = ({ selectedStock }) => {
 
         // const apiKey = getCookie("API_KEY");
         const target = `https://apidians.azurewebsites.net/stocks/${selectedStock}/chart`;
-        const apiUrl = `http://localhost:80/api/proxy`;
+        const apiUrl = `https://proxydians.azurewebsites.net/api/proxy`;
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {

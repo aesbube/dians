@@ -23,9 +23,9 @@ services:
     env_file:
       - .env
 
-  bff:
-    container_name: bff-container
-    image: aesbube/bff:latest
+  proxy:
+    container_name: proxy-container
+    image: aesbube/proxy:latest
     ports:
       - "80:80"
     networks:

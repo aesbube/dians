@@ -23,7 +23,7 @@ const Fundamental: React.FC<FundamentalProps> = ({ stock }) => {
 
         // const apiKey = getCookie("API_KEY");
         const target = `https://apidians.azurewebsites.net/fundamental/${stock}`;
-        const apiUrl = `http://localhost:80/api/proxy`;
+        const apiUrl = `https://proxydians.azurewebsites.net/api/proxy`;
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {

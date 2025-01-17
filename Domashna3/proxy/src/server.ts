@@ -34,7 +34,11 @@ app.post("/api/proxy", async (req: Request, res: Response) => {
   }
 });
 
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received - ignoring");
+});
+
 const port = 80;
 app.listen(port, () => {
-  console.log(`BFF server running on http://localhost:${port}`);
+  console.log(`Proxy running on http://localhost:${port}`);
 });
