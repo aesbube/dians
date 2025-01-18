@@ -1,6 +1,6 @@
 import os
 from pymongo import MongoClient
-from lstm_predictor import predictor
+from lstm_predictor import lstm_model
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -39,7 +39,8 @@ def get_lstm(stock_id: str):
         return None
     if len(stock["data"]) == 0:
         return None
-    prediction = predictor(stock["data"])
+    model = lstm_model(stock["data"])
+    prediction = model.get_predictions
     dates = prediction["dates"] + prediction["forecast_dates"]
     prices = prediction["prices"] + prediction["forecast"]
     result = [dates[-min(100, len(dates)):], prices[-min(100, len(prices)):]]

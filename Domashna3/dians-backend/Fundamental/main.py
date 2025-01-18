@@ -1,7 +1,7 @@
 import os
 from pymongo import MongoClient
 from transformers import pipeline
-from fundamental_analysis import get_fund_analysis
+from fundamental_analysis import FundamentalAnalysis
 from dotenv import load_dotenv
 import os
 
@@ -43,8 +43,10 @@ def get_fundamental(stock_id: str):
     stock = fundamental_collection.find_one({"_id": stock_id.upper()})
     if not stock:
         return None
-    result = get_fund_analysis(
-        stock['file'][:min(512, len(stock['file']))], translator, pipe)
+    
+    fundAnalysis = FundamentalAnalysis(stock['file'][:min(512, len(stock['file']))], translator, pipe)
+    
+    result = fundAnalysis.get_fund_analysis()
     save_to_database(stock_id, result)
     return result
 
