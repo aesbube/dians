@@ -6,10 +6,11 @@ from keras.api.models import Sequential
 from keras.api.layers import LSTM, Dense
 import keras
 
+""" Used to parse the format of the data from the API response """
 def parse_singular(entry: str):
     return int(entry[:-8].replace('.', ''))
 
-
+""" Parses the data from the API response to a more readable format """
 def parse_data(data):
     data_copy = []
     for entry in data:
@@ -22,16 +23,18 @@ def parse_data(data):
     return data_copy
 
 
+""" The main function that predicts the stock prices, given the data """
 def predictor(data):
     data = parse_data(data)
     data = pd.DataFrame(data=data)
     
+    """ Removing unnecessary columns, reversing the data and setting the date as the index """
     data.drop(columns=['min_value', 'max_value', 'volume'], inplace=True)
-
     data['date'] = pd.to_datetime(data['date'], dayfirst=True)
     data = data[::-1]
     data.set_index('date', inplace=True)
 
+    """ If the data is too small, return a forecast of the last transaction """
     if len(data) < 50:
         forecast = [int(data['last_transaction'][-1])] * 10
         forecast_start_date = datetime.today()
@@ -45,7 +48,8 @@ def predictor(data):
     data = pd.concat([data, data.shift(periods=periods)], axis=1)
 
     data.dropna(axis=0, inplace=True)
-
+    
+    """ Splitting the data into training and testing sets """
     x, y = data.drop(columns=['last_transaction']), data['last_transaction']
     train_x, test_x, train_y, test_y = train_test_split(
         x, y, test_size=0.3, shuffle=False)
@@ -55,6 +59,7 @@ def predictor(data):
     test_x = test_x.values.reshape(
         test_x.shape[0], lag, (test_x.shape[1] // lag))
 
+    """ Building and training the LSTM model """
     model = Sequential()
     model.add(LSTM(100,  activation='relu', input_shape=(
         train_x.shape[1], train_x.shape[2]), return_sequences=True))
@@ -67,6 +72,7 @@ def predictor(data):
     history = model.fit(train_x, train_y, batch_size=16,
                         validation_split=0.2, epochs=5, shuffle=False)
 
+    """ Predicting the stock prices """
     preds = model.predict(test_x)
 
     look_back = lag
@@ -99,5 +105,9 @@ def predictor(data):
     forecast_dates = [datetime.strftime(pd.to_datetime(
         date), "%d.%m.%Y") for date in forecast_dates]
 
-    return {"forecast": forecast, "forecast_dates": forecast_dates, "dates": [datetime.strftime(date, "%d.%m.%Y") for date in data.index[-min(500, len(data.index)):]],
-            "prices": data['last_transaction'].tolist()[-min(500, len(data['last_transaction'])):]}
+    dates = [datetime.strftime(date, "%d.%m.%Y") for date in data.index[-min(500, len(data.index)):]]
+    
+    prices = data['last_transaction'].tolist()[-min(500, len(data['last_transaction'])):]
+    
+    return {"forecast": forecast, "forecast_dates": forecast_dates, "dates": dates, "prices": prices}
+

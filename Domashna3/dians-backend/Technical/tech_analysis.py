@@ -1,10 +1,10 @@
 import numpy as np
 
-
+""" Used to parse the format of a singular price record from the API response because the data is in string format """
 def parse_singular(entry: str):
     return int(entry[:-8].replace('.', ''))
 
-
+""" Removes any unnecessary data from the API response """
 def parse_data(data):
     data_copy = []
     for entry in data:
@@ -135,9 +135,7 @@ def calculate_ultimate_oscillator(data):
         avg = bp_sum / tr_sum if tr_sum != 0 else 0
         return bp_sum, tr_sum, avg
 
-    bp_sums = []
-    tr_sums = []
-    avgs = []
+    bp_sums, tr_sums, avgs = [], [], []
 
     for window in [7, 14, 28]:
         bp_sum, tr_sum, avg = bp_tr_sum(window)
@@ -326,22 +324,35 @@ def tech_results(data, window):
     window = min(window, len(data))
     last_transactions = np.array([x["last_transaction"] for x in data])
     result = dict()
+    
     result["rsi"] = calculate_relative_strength_index(
         last_transactions, window)
+    
     result["momentum"] = calculate_momentum(last_transactions, window)
-    result["williams_percent_range"] = calculate_williams_percent_range(
+    
+    result["williams_percent_range"] = calculate_williams_percent_range(   
         last_transactions, window)
+    
     result["stochastic_oscillator"] = calculate_stochastic_oscillator(
         last_transactions, window)
+    
     result["ultimate_oscillator"] = calculate_ultimate_oscillator(data)
+    
     result["sma"] = calculate_sma(last_transactions, min(window, 10))
+    
     result["ema"] = calculate_ema(last_transactions, min(window, 10))
-    result["hull_moving_average"] = hull_moving_average(
+    
+    result["hull_moving_average"] = hull_moving_average(    
         last_transactions, min(9, window))
+    
     result["volume_weighted_average_price"] = volume_weighted_moving_average(
         data, window)
+    
     result["ma_comparison"] = compare_moving_averages(last_transactions[0], calculate_sma(last_transactions, min(window, 10)), calculate_ema(
         last_transactions, min(window, 10)), hull_moving_average(last_transactions, min(9, window)), volume_weighted_moving_average(data, window))
+    
     result["ichimoku_base_line"] = ichimoku_base_line(data, window)
+    
     result["overall_signal"] = get_overall_signal(result)
+    
     return result
