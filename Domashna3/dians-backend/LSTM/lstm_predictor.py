@@ -109,9 +109,9 @@ class lstm_model:
         forecast_dates = [datetime.strftime(pd.to_datetime(
             date), "%d.%m.%Y") for date in forecast_dates]
 
-        dates = [datetime.strftime(date, "%d.%m.%Y") for date in data.index[-min(500, len(data.index)):]]
+        dates = [datetime.strftime(date, "%d.%m.%Y") for date in data.index[-min(200, len(data.index)):]]
         
-        prices = data['last_transaction'].tolist()[-min(500, len(data['last_transaction'])):]
+        prices = data['last_transaction'].tolist()[-min(200, len(data['last_transaction'])):]
         
         return {"forecast": forecast, "forecast_dates": forecast_dates, "dates": dates, "prices": prices}
     
