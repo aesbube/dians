@@ -47,7 +47,7 @@ class lstm_model:
             return {"forecast": forecast, "forecast_dates": forecast_dates, "dates": [datetime.strftime(date, "%d.%m.%Y") for date in data.index],
                     "prices": data['last_transaction'].tolist()}
 
-        lag = 5
+        lag = 10
         periods = range(lag, 0, -1)
         data = pd.concat([data, data.shift(periods=periods)], axis=1)
 
@@ -74,7 +74,7 @@ class lstm_model:
         ), metrics=[keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()])
 
         history = model.fit(train_x, train_y, batch_size=16,
-                            validation_split=0.2, epochs=5, shuffle=False)
+                            validation_split=0.2, epochs=8, shuffle=False)
 
         """ Predicting the stock prices """
         preds = model.predict(test_x)
@@ -100,7 +100,7 @@ class lstm_model:
                 last_date, periods=num_prediction+1).tolist()
             return prediction_dates
 
-        num_prediction = 9
+        num_prediction = 59
         forecast = predict(num_prediction, model)
         forecast_dates = predict_dates(num_prediction)
 
