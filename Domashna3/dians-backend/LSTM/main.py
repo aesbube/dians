@@ -40,7 +40,7 @@ def get_lstm(stock_id: str):
     if len(stock["data"]) == 0:
         return None
     model = lstm_model(stock["data"])
-    prediction = model.get_predictions
+    prediction = model.get_predictions()
     dates = prediction["dates"] + prediction["forecast_dates"]
     prices = prediction["prices"] + prediction["forecast"]
     result = [dates[-min(100, len(dates)):], prices[-min(100, len(prices)):]]

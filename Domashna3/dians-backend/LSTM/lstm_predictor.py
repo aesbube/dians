@@ -11,7 +11,7 @@ class lstm_model:
         self.data = data
     
     """ Used to parse the format of the data from the API response """
-    def parse_singular(entry: str):
+    def parse_singular(self, entry: str):
         return int(entry[:-8].replace('.', ''))
 
     """ Parses the data from the API response to a more readable format """
@@ -29,7 +29,7 @@ class lstm_model:
 
     """ The main function that predicts the stock prices, given the data """
     def predictor(self):
-        data = self.parse_data(data)
+        data = self.parse_data()
         data = pd.DataFrame(data=data)
         
         """ Removing unnecessary columns, reversing the data and setting the date as the index """
